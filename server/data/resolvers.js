@@ -18,8 +18,17 @@ class Client {
 
 export const resolvers = {
     Query: {
-        getClient: ({ id }) => {
-            return new Client(id, clientsDB[id]);
+        getClient: (root, { id }) => {
+            return new Promise((resolve, object) => {
+                Clients.findById(id, (error, client) => {
+                    if (error) {
+                        rejects(error);
+                    } else resolve(client);
+                });
+            });
+        },
+        getClients: (root, { limit }) => {
+            return Clients.find({}).limit(limit);
         }
     },
     Mutation: {
@@ -28,7 +37,7 @@ export const resolvers = {
                 name: input.name,
                 surname: input.surname,
                 company: input.company,
-                email: input.email,
+                emails: input.emails,
                 age: input.age,
                 type: input.type,
                 pedidos: input.pedidos
@@ -40,6 +49,23 @@ export const resolvers = {
                     if (error) {
                         rejects(error);
                     } else resolve(newClient);
+                });
+            });
+        },
+        updateClient: (root, { input }) => {
+            return new Promise((resolve, object) => {
+                Clients.findOneAndUpdate({ _id: input.id }, input, { new: true }, (error, client) => {
+                    if (error) {
+                        rejects(error);
+                    } else resolve(client);
+                });
+            });
+        },
+        deleteClient: (root, { id }) => {
+            return new Promise((resolve, object) => {
+                Clients.findOneAndRemove({ _id: id }, error => {
+                    if (error) rejects(error);
+                    else resolve('Se elimino correctamente');
                 });
             });
         }
