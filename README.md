@@ -6,6 +6,9 @@
 - express
 - express-graphql
 - graphql
+- graphql-tools
+- graphql-import
+- mongoose
 
 ## Dev Dependencies
 
