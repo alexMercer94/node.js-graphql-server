@@ -9,6 +9,7 @@
 - graphql-tools
 - graphql-import
 - mongoose
+- apollo-server-express
 
 ## Dev Dependencies
 

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { Clients } from './db';
 import { resolve } from 'url';
 import { rejects } from 'assert';

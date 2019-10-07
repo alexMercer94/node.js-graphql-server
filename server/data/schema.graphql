@@ -19,7 +19,7 @@ type Email {
 }
 
 enum TypeClient {
-    BASIC
+    BASICO
     PREMIUM
 }
 

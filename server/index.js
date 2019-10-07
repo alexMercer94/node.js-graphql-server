@@ -1,26 +1,16 @@
 import express from 'express';
+import cors from 'cors';
 // GraphQL
-import graphqlHTTP from 'express-graphql';
-import { schema } from './data/schema';
+import { ApolloServer } from 'apollo-server-express';
+import { typeDefs } from './data/schema';
 // Resolvers
-import resolvers from './data/resolvers';
+import { resolvers } from './data/resolvers';
 
 const app = express();
+app.use(cors());
+const server = new ApolloServer({ typeDefs, resolvers });
 
-app.get('/', (req, res) => {
-    res.send('Ready!');
-});
-
-app.use(
-    '/graphql',
-    graphqlHTTP({
-        // Schema que va a utilizar
-        schema,
-        // utilizar GraphiQL
-        graphiql: true
-    })
-);
-
-app.listen(5000, () => {
-    console.log('Server started');
+server.applyMiddleware({ app });
+app.listen({ port: 4000 }, () => {
+    console.log(`Server is running on http://localhost:4000${server.graphqlPath}`);
 });
