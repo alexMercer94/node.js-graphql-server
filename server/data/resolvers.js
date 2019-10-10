@@ -26,8 +26,18 @@ export const resolvers = {
                 });
             });
         },
-        getClients: (root, { limit }) => {
-            return Clients.find({}).limit(limit);
+        getClients: (root, { limit, offset }) => {
+            return Clients.find({})
+                .limit(limit)
+                .skip(offset);
+        },
+        totalClients: root => {
+            return new Promise((resolve, object) => {
+                Clients.countDocuments({}, (error, count) => {
+                    if (error) rejects(error);
+                    else resolve(count);
+                });
+            });
         }
     },
     Mutation: {

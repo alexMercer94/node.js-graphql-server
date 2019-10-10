@@ -25,7 +25,8 @@ enum TypeClient {
 
 type Query {
     getClient(id: ID): Client
-    getClients(limit: Int): [Client]
+    getClients(limit: Int, offset: Int): [Client]
+    totalClients: String
 }
 
 input PedidoInput {
