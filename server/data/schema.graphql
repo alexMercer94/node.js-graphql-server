@@ -18,15 +18,16 @@ type Email {
     email: String
 }
 
+type Product {
+    id: ID
+    name: String!
+    price: Int!
+    stock: Int!
+}
+
 enum TypeClient {
     BASICO
     PREMIUM
-}
-
-type Query {
-    getClient(id: ID): Client
-    getClients(limit: Int, offset: Int): [Client]
-    totalClients: String
 }
 
 input PedidoInput {
@@ -50,8 +51,27 @@ input ClientInput {
     pedidos: [PedidoInput]
 }
 
+input ProductInput {
+    id: ID
+    name: String!
+    price: Int!
+    stock: Int!
+}
+
+"""" Queries """
+type Query {
+    # Queries for Clients
+    getClient(id: ID): Client
+    getClients(limit: Int, offset: Int): [Client]
+    totalClients: String
+    # Queries for Products
+    getProducts(limit: Int, offset: Int): [Product]
+    getProduct(id: ID!): Product
+}
+
 """ Mutations para crear nuevos clientes """
 type Mutation {
+    # Clients
     # Nombre del Resolver, Input con datos y Valor que retorna
     """ Permite crear nuevos clientes """
     createClient(input: ClientInput): Client
@@ -59,4 +79,8 @@ type Mutation {
     updateClient(input: ClientInput): Client
     """ Permite eliminar clientes """
     deleteClient(id: ID!): String
+    # Products
+    newProduct(input: ProductInput): Product
+    updateProduct(input: ProductInput): Product
+    deleteProduct(id: ID!): String
 }
