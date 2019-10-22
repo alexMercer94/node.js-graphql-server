@@ -51,6 +51,14 @@ export const resolvers = {
                     else resolve(product);
                 });
             });
+        },
+        totalProducts: root => {
+            return new Promise((resolve, object) => {
+                Products.countDocuments({}, (error, count) => {
+                    if (error) rejects(error);
+                    else resolve(count);
+                });
+            });
         }
     },
     Mutation: {
@@ -87,7 +95,7 @@ export const resolvers = {
             return new Promise((resolve, object) => {
                 Clients.findOneAndRemove({ _id: id }, error => {
                     if (error) rejects(error);
-                    else resolve('Se elimino correctamente');
+                    else resolve('El cliente se eliminó correctamente');
                 });
             });
         },
@@ -120,7 +128,7 @@ export const resolvers = {
             return new Promise((resolve, object) => {
                 Products.findOneAndRemove({ _id: id }, error => {
                     if (error) rejects(error);
-                    else resolve('Se elimino correctamente');
+                    else resolve('El producto se eliminó correctamente');
                 });
             });
         }
