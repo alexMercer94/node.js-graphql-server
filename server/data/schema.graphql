@@ -6,12 +6,6 @@ type Client {
     emails: [Email]
     age: Int
     type: TypeClient
-    pedidos: [Pedido]
-}
-
-type Pedido {
-    product: String
-    price: Int
 }
 
 type Email {
@@ -25,9 +19,29 @@ type Product {
     stock: Int!
 }
 
+type Order {
+    id: ID
+    order: [OrderProduct]
+    total: Int
+    date: String
+    client: ID
+    state: StateOrder
+}
+
+type OrderProduct {
+    id: ID
+    amount: Int
+}
+
 enum TypeClient {
     BASICO
     PREMIUM
+}
+
+enum StateOrder {
+    PENDIENTE
+    COMPLETADO
+    CANCELADO
 }
 
 input PedidoInput {
@@ -58,6 +72,20 @@ input ProductInput {
     stock: Int!
 }
 
+input OrderInput {
+    id: ID
+    order: [OrderProductInput]
+    total: Int
+    date: String
+    client: ID
+    state: StateOrder
+}
+
+input OrderProductInput {
+    id: ID
+    amount: Int
+}
+
 """" Queries """
 type Query {
     # Queries for Clients
@@ -65,7 +93,7 @@ type Query {
     getClients(limit: Int, offset: Int): [Client]
     totalClients: String
     # Queries for Products
-    getProducts(limit: Int, offset: Int): [Product]
+    getProducts(limit: Int, offset: Int, stock: Boolean): [Product]
     getProduct(id: ID!): Product
     totalProducts: String
 }
@@ -84,4 +112,6 @@ type Mutation {
     newProduct(input: ProductInput): Product
     updateProduct(input: ProductInput): Product
     deleteProduct(id: ID!): String
+    # Orders
+    newOrder(input: OrderInput): Order
 }

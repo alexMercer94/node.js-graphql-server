@@ -1,4 +1,4 @@
-import { Clients, Products } from './db';
+import { Clients, Products, Orders } from './db';
 import { resolve } from 'url';
 import { rejects } from 'assert';
 
@@ -39,8 +39,12 @@ export const resolvers = {
                 });
             });
         },
-        getProducts: (root, { limit, offset }) => {
-            return Products.find({})
+        getProducts: (root, { limit, offset, stock }) => {
+            let filtro;
+            if (stock) {
+                filtro = { stock: { $gt: 0 } };
+            }
+            return Products.find({ filtro })
                 .limit(limit)
                 .skip(offset);
         },
@@ -75,6 +79,20 @@ export const resolvers = {
 
             newClient.id = newClient._id;
             return new Promise((resolve, object) => {
+                // Recorrer y actualizar la cantidad de productos
+                input.order.forEach(order => {
+                    Products.updateOne(
+                        { _id: order.id },
+                        {
+                            $inc: {
+                                stock: -order.amount
+                            }
+                        },
+                        function(error) {
+                            if (error) return new Error(error);
+                        }
+                    );
+                });
                 newClient.save(error => {
                     if (error) {
                         rejects(error);
@@ -129,6 +147,23 @@ export const resolvers = {
                 Products.findOneAndRemove({ _id: id }, error => {
                     if (error) rejects(error);
                     else resolve('El producto se eliminó correctamente');
+                });
+            });
+        },
+        newOrder: (root, { input }) => {
+            const newOrder = new Orders({
+                order: input.order,
+                total: input.total,
+                date: new Date(),
+                client: input.client,
+                state: 'PENDIENTE'
+            });
+
+            newOrder.id = newOrder._id;
+            return new Promise((resolve, object) => {
+                newOrder.save(error => {
+                    if (error) rejects(error);
+                    else resolve(newOrder);
                 });
             });
         }

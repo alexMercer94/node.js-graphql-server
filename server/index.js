@@ -11,6 +11,6 @@ app.use(cors());
 const server = new ApolloServer({ typeDefs, resolvers });
 
 server.applyMiddleware({ app });
-app.listen({ port: 5000 }, () => {
-    console.log(`Server is running on http://localhost:5000${server.graphqlPath}`);
+app.listen({ port: 5002 }, () => {
+    console.log(`Server is running on http://localhost:5002${server.graphqlPath}`);
 });
