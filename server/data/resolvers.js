@@ -63,6 +63,14 @@ export const resolvers = {
                     else resolve(count);
                 });
             });
+        },
+        getOrders: (root, { client }) => {
+            return new Promise((resolve, object) => {
+                Orders.find({ client: client }, (error, order) => {
+                    if (error) rejects(error);
+                    else resolve(order);
+                });
+            });
         }
     },
     Mutation: {
@@ -164,6 +172,35 @@ export const resolvers = {
                 newOrder.save(error => {
                     if (error) rejects(error);
                     else resolve(newOrder);
+                });
+            });
+        },
+        updateState: (root, { input }) => {
+            return new Promise((resolve, object) => {
+                // Recorre y actualiza la cantidad de productos en base al estado del pedido
+                const { state } = input;
+                let instruction;
+                if (state === 'COMPLETADO') {
+                    instruction = '-';
+                } else if (state === 'CANCELADO') {
+                    instruction = '+';
+                }
+
+                console.log(input);
+
+                input.order.forEach(order => {
+                    Products.updateOne(
+                        { _id: order.id },
+                        { $inc: { stock: `${instruction}${order.amount}` } },
+                        function(error) {
+                            if (error) return new Error(error);
+                        }
+                    );
+                });
+
+                Orders.findOneAndUpdate({ _id: input.id }, input, { new: true }, error => {
+                    if (error) rejects(error);
+                    else resolve('Se actualizó correctamente');
                 });
             });
         }

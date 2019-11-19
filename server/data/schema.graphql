@@ -96,6 +96,8 @@ type Query {
     getProducts(limit: Int, offset: Int, stock: Boolean): [Product]
     getProduct(id: ID!): Product
     totalProducts: String
+    # Queries for Orders
+    getOrders(client: String): [Order]
 }
 
 """ Mutations para crear nuevos clientes """
@@ -114,4 +116,5 @@ type Mutation {
     deleteProduct(id: ID!): String
     # Orders
     newOrder(input: OrderInput): Order
+    updateState(input: OrderInput): String
 }
