@@ -33,6 +33,11 @@ type OrderProduct {
     amount: Int
 }
 
+type ClientTotal {
+    total: Float
+    client: [Client]
+}
+
 enum TypeClient {
     BASICO
     PREMIUM
@@ -97,7 +102,9 @@ type Query {
     getProduct(id: ID!): Product
     totalProducts: String
     # Queries for Orders
-    getOrders(client: String): [Order]
+    getOrders(client: ID): [Order]
+    #Charts
+    topClients: [ClientTotal]
 }
 
 """ Mutations para crear nuevos clientes """
