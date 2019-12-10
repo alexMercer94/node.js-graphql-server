@@ -1,6 +1,8 @@
-import { Clients, Products, Orders } from './db';
-import { resolve } from 'url';
+import { Clients, Products, Orders, Users } from './db';
 import { rejects } from 'assert';
+import bcript from 'bcryptjs';
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
 class Client {
     constructor(id, { name, surname, company, email, age, type, pedidos }) {
@@ -14,6 +16,14 @@ class Client {
         this.pedidos = pedidos;
     }
 }
+
+// Generate Token
+dotenv.config({ path: 'variables.env' });
+const createToken = (loginUser, secret, expiresIn) => {
+    const { user } = loginUser;
+
+    return jwt.sign({ user }, secret, { expiresIn });
+};
 
 export const resolvers = {
     Query: {
@@ -238,6 +248,38 @@ export const resolvers = {
                     else resolve('Se actualizó correctamente');
                 });
             });
+        },
+        createUser: async (root, { user, password }) => {
+            // Revisar si un usuario ya existe
+            const usersExist = await Users.findOne({ user });
+            if (usersExist) {
+                throw new Error('El usuario ya existe.');
+            }
+
+            const newUser = await new Users({
+                user,
+                password
+            }).save();
+
+            return 'Usuario creado correctamente.';
+        },
+        authenticateUser: async (root, { user, password }) => {
+            const userName = await Users.findOne({ user });
+
+            if (!userName) {
+                throw new Error('El usuario no encontrado.');
+            }
+
+            const correctPassword = await bcript.compare(password, userName.password);
+
+            // Si el password es incorrecto
+            if (!correctPassword) {
+                throw new Error('Password Incorrecto');
+            }
+
+            return {
+                token: createToken(userName, process.env.SECRET, '1hr')
+            };
         }
     }
 };

@@ -1,3 +1,4 @@
+import bcript from 'bcryptjs';
 // #1 Import mongoose
 const mongoose = require('mongoose');
 
@@ -42,4 +43,30 @@ const ordersSchema = new mongoose.Schema({
 
 const Orders = mongoose.model('orders', ordersSchema);
 
-export { Clients, Products, Orders };
+// Users
+const usersSchema = new mongoose.Schema({
+    user: String,
+    password: String
+});
+
+// Hashear los passwords antes de guardarlos en bd
+usersSchema.pre('save', function(next) {
+    // Si el password no esta modificado ejecutar la siguiente función
+    if (!this.isModified('password')) {
+        return next();
+    }
+
+    bcript.genSalt(10, (err, salt) => {
+        if (err) return next(err);
+
+        bcript.hash(this.password, salt, (err, hash) => {
+            if (err) return next(err);
+            this.password = hash;
+            next();
+        });
+    });
+});
+
+const Users = mongoose.model('users', usersSchema);
+
+export { Clients, Products, Orders, Users };

@@ -38,6 +38,10 @@ type ClientTotal {
     client: [Client]
 }
 
+type Token {
+    token: String!
+}
+
 enum TypeClient {
     BASICO
     PREMIUM
@@ -124,4 +128,7 @@ type Mutation {
     # Orders
     newOrder(input: OrderInput): Order
     updateState(input: OrderInput): String
+    # Users
+    createUser(user: String, password: String): String
+    authenticateUser(user: String!, password: String!): Token
 }
