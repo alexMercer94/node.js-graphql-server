@@ -116,6 +116,15 @@ export const resolvers = {
                     }
                 );
             });
+        },
+        getUser: (root, args, { userActual }) => {
+            if (!userActual) {
+                return null;
+            }
+
+            // Obtener el usuario actual del request del JWT verificado
+            const user = Users.findOne({ user: userActual.user });
+            return user;
         }
     },
     Mutation: {

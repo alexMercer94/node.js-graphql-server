@@ -42,6 +42,10 @@ type Token {
     token: String!
 }
 
+type User {
+    user: String
+}
+
 enum TypeClient {
     BASICO
     PREMIUM
@@ -109,6 +113,8 @@ type Query {
     getOrders(client: ID): [Order]
     #Charts
     topClients: [ClientTotal]
+    #Users
+    getUser: User
 }
 
 """ Mutations para crear nuevos clientes """
