@@ -18,7 +18,8 @@ const clientsSchema = new mongoose.Schema({
     emails: Array,
     age: Number,
     type: String,
-    pedidos: Array
+    pedidos: Array,
+    seller: mongoose.Types.ObjectId
 });
 
 const Clients = mongoose.model('clients', clientsSchema);
@@ -38,7 +39,8 @@ const ordersSchema = new mongoose.Schema({
     total: Number,
     date: Date,
     client: mongoose.Types.ObjectId,
-    state: String
+    state: String,
+    seller: mongoose.Types.ObjectId
 });
 
 const Orders = mongoose.model('orders', ordersSchema);
@@ -46,7 +48,9 @@ const Orders = mongoose.model('orders', ordersSchema);
 // Users
 const usersSchema = new mongoose.Schema({
     user: String,
-    password: String
+    name: String,
+    password: String,
+    role: String
 });
 
 // Hashear los passwords antes de guardarlos en bd

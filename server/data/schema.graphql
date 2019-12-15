@@ -38,12 +38,20 @@ type ClientTotal {
     client: [Client]
 }
 
+type SellerTotal {
+    total: Float
+    seller: [User]
+}
+
 type Token {
     token: String!
 }
 
 type User {
+    id: ID
     user: String
+    name: String
+    role: String
 }
 
 enum TypeClient {
@@ -75,7 +83,8 @@ input ClientInput {
     emails: [EmailInput]
     age: Int!
     type: TypeClient! 
-    pedidos: [PedidoInput]
+    pedidos: [PedidoInput],
+    seller: ID
 }
 
 input ProductInput {
@@ -92,6 +101,7 @@ input OrderInput {
     date: String
     client: ID
     state: StateOrder
+    seller: ID
 }
 
 input OrderProductInput {
@@ -103,8 +113,8 @@ input OrderProductInput {
 type Query {
     # Queries for Clients
     getClient(id: ID): Client
-    getClients(limit: Int, offset: Int): [Client]
-    totalClients: String
+    getClients(limit: Int, offset: Int, seller: String): [Client]
+    totalClients(seller: String): String
     # Queries for Products
     getProducts(limit: Int, offset: Int, stock: Boolean): [Product]
     getProduct(id: ID!): Product
@@ -113,6 +123,7 @@ type Query {
     getOrders(client: ID): [Order]
     #Charts
     topClients: [ClientTotal]
+    topSellers: [SellerTotal]
     #Users
     getUser: User
 }
@@ -135,6 +146,6 @@ type Mutation {
     newOrder(input: OrderInput): Order
     updateState(input: OrderInput): String
     # Users
-    createUser(user: String, password: String): String
+    createUser(user: String!, name: String!, password: String!, role: String!): String
     authenticateUser(user: String!, password: String!): Token
 }

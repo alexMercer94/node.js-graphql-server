@@ -3,6 +3,9 @@ import { rejects } from 'assert';
 import bcript from 'bcryptjs';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 class Client {
     constructor(id, { name, surname, company, email, age, type, pedidos }) {
@@ -36,14 +39,23 @@ export const resolvers = {
                 });
             });
         },
-        getClients: (root, { limit, offset }) => {
-            return Clients.find({})
+        getClients: (root, { limit, offset, seller }) => {
+            let filtro;
+            if (seller) {
+                filtro = { seller: new ObjectId(seller) };
+            }
+
+            return Clients.find(filtro)
                 .limit(limit)
                 .skip(offset);
         },
-        totalClients: root => {
+        totalClients: (root, { seller }) => {
             return new Promise((resolve, object) => {
-                Clients.countDocuments({}, (error, count) => {
+                let filtro;
+                if (seller) {
+                    filtro = { seller: new ObjectId(seller) };
+                }
+                Clients.countDocuments(filtro, (error, count) => {
                     if (error) rejects(error);
                     else resolve(count);
                 });
@@ -125,6 +137,41 @@ export const resolvers = {
             // Obtener el usuario actual del request del JWT verificado
             const user = Users.findOne({ user: userActual.user });
             return user;
+        },
+        topSellers: root => {
+            return new Promise((resolve, object) => {
+                Orders.aggregate(
+                    [
+                        {
+                            $match: { state: 'COMPLETADO' }
+                        },
+                        {
+                            $group: {
+                                _id: '$seller',
+                                total: { $sum: '$total' }
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: '_id',
+                                foreignField: '_id',
+                                as: 'seller'
+                            }
+                        },
+                        {
+                            $sort: { total: -1 }
+                        },
+                        {
+                            $limit: 10
+                        }
+                    ],
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+            });
         }
     },
     Mutation: {
@@ -136,25 +183,12 @@ export const resolvers = {
                 emails: input.emails,
                 age: input.age,
                 type: input.type,
-                pedidos: input.pedidos
+                pedidos: input.pedidos,
+                seller: input.seller
             });
 
             newClient.id = newClient._id;
             return new Promise((resolve, object) => {
-                // Recorrer y actualizar la cantidad de productos
-                input.order.forEach(order => {
-                    Products.updateOne(
-                        { _id: order.id },
-                        {
-                            $inc: {
-                                stock: -order.amount
-                            }
-                        },
-                        function(error) {
-                            if (error) return new Error(error);
-                        }
-                    );
-                });
                 newClient.save(error => {
                     if (error) {
                         rejects(error);
@@ -218,7 +252,8 @@ export const resolvers = {
                 total: input.total,
                 date: new Date(),
                 client: input.client,
-                state: 'PENDIENTE'
+                state: 'PENDIENTE',
+                seller: input.seller
             });
 
             newOrder.id = newOrder._id;
@@ -240,8 +275,6 @@ export const resolvers = {
                     instruction = '+';
                 }
 
-                console.log(input);
-
                 input.order.forEach(order => {
                     Products.updateOne(
                         { _id: order.id },
@@ -258,7 +291,7 @@ export const resolvers = {
                 });
             });
         },
-        createUser: async (root, { user, password }) => {
+        createUser: async (root, { user, name, password, role }) => {
             // Revisar si un usuario ya existe
             const usersExist = await Users.findOne({ user });
             if (usersExist) {
@@ -267,7 +300,9 @@ export const resolvers = {
 
             const newUser = await new Users({
                 user,
-                password
+                name,
+                password,
+                role
             }).save();
 
             return 'Usuario creado correctamente.';
